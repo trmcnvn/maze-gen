@@ -1,9 +1,8 @@
 use ndarray::Array2;
 use rand::prelude::*;
-use std::collections::VecDeque;
 use std::fmt;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 enum Direction {
     North,
     East,
@@ -42,8 +41,8 @@ impl Maze {
 
     pub fn generate(&mut self) {
         let mut rng = rand::thread_rng();
-        let mut start_x = rng.gen_range(1, self.grid.cols() - 3) as isize;
-        let mut start_y = rng.gen_range(1, self.grid.rows() - 3) as isize;
+        let mut start_x = rng.gen_range(0, self.grid.cols() - 1) as isize;
+        let mut start_y = rng.gen_range(0, self.grid.rows() - 1) as isize;
         if start_x % 2 == 0 {
             start_x += 1;
         }
@@ -53,20 +52,20 @@ impl Maze {
 
         let mut visited: Vec<Point> = Vec::new();
         let mut previous_points: Vec<Point> = Vec::new();
-        let mut stack: VecDeque<Point> = VecDeque::new();
-        stack.push_front((start_x, start_y));
-        while let Some(point) = stack.pop_front() {
+        let mut stack: Vec<Point> = Vec::new();
+        stack.push((start_x, start_y));
+        while let Some(point) = stack.pop() {
             if let Some((neighbour, direction)) = self.get_neighbour(point, &visited) {
                 self.set_cell_to_empty(point, direction);
                 visited.push(neighbour);
-                stack.push_front(neighbour);
+                stack.push(neighbour);
                 previous_points.push(point);
             } else {
                 if previous_points.is_empty() {
                     break;
                 }
                 let last_point = previous_points.pop().unwrap();
-                stack.push_front(last_point);
+                stack.push(last_point);
             }
         }
     }
